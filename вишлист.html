@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WishList — Общий вишлист</title>
+<style>
+  :root {
+    --primary: #6c5ce7;
+    --primary-dark: #5a4bd1;
+    --accent: #fd79a8;
+    --bg: #f8f9fd;
+    --card: #ffffff;
+    --text: #2d3436;
+    --text-light: #636e72;
+    --border: #e8eaf0;
+    --success: #00b894;
+    --danger: #e17055;
+    --shadow: 0 4px 20px rgba(108, 92, 231, 0.08);
+    --shadow-hover: 0 8px 30px rgba(108, 92, 231, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ============ AUTH SCREEN ============ */
+  .auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  }
+
+  .auth-card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.4s ease;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .auth-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+
+  .auth-logo-icon { font-size: 64px; display: block; margin-bottom: 8px; }
+  .auth-logo h1 { font-size: 28px; font-weight: 800; color: var(--text); }
+  .auth-logo p { color: var(--text-light); font-size: 14px; margin-top: 4px; }
+
+  .auth-tabs {
+    display: flex;
+    background: var(--bg);
+    border-radius: 14px;
+    padding: 5px;
+    margin-bottom: 24px;
+  }
+
+  .auth-tab {
+    flex: 1;
+    padding: 11px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+
+  .auth-tab.active {
+    background: white;
+    color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 7px;
+    color: var(--text);
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+
+  .form-group input:focus,
+  .form-group textarea:focus,
+  .form-group select:focus {
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 4px rgba(108,92,231,0.1);
+  }
+
+  .form-group textarea { resize: vertical; min-height: 80px; }
+
+  .form-error {
+    background: rgba(225,112,85,0.12);
+    color: var(--danger);
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .form-error.show { display: block; }
+
+  .avatar-picker {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  .avatar-opt {
+    font-size: 24px;
+    width: 46px;
+    height: 46px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .avatar-opt:hover { border-color: var(--primary); transform: scale(1.05); }
+  .avatar-opt.selected {
+    border-color: var(--primary);
+    background: rgba(108,92,231,0.12);
+  }
+
+  /* ============ APP ============ */
+  .app { display: none; }
+  .app.visible { display: block; }
+
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+    padding: 24px;
+    color: white;
+    box-shadow: 0 4px 24px rgba(108, 92, 231, 0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-icon { font-size: 30px; }
+
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.18);
+    padding: 8px 8px 8px 16px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .user-badge-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .logout-btn {
+    background: rgba(255,255,255,0.9);
+    color: var(--primary);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .logout-btn:hover { background: white; }
+
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+  }
+
+  .search-box input {
+    width: 100%;
+    padding: 14px 18px 14px 46px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s;
+    background: var(--card);
+  }
+
+  .search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.1);
+  }
+
+  .search-box::before {
+    content: '🔍';
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    pointer-events: none;
+  }
+
+  .btn {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 14px rgba(108, 92, 231, 0.3);
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
+  }
+
+  .btn-ghost {
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .tab {
+    padding: 10px 20px;
+    border-radius: 50px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text-light);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab:hover { border-color: var(--primary); color: var(--primary); }
+  .tab.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+  .wish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .wish-card {
+    background: var(--card);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    animation: fadeIn 0.4s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .wish-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+  .wish-card.reserved { opacity: 0.75; }
+
+  .wish-image {
+    width: 100%;
+    height: 160px;
+    background: linear-gradient(135deg, #e8eaf0, #d4d7e5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+  }
+
+  .wish-body { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+
+  .wish-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .wish-title { font-size: 18px; font-weight: 700; line-height: 1.3; flex: 1; }
+  .wish-price { font-size: 15px; font-weight: 700; color: var(--primary); white-space: nowrap; }
+  .wish-desc { color: var(--text-light); font-size: 14px; margin-bottom: 14px; flex: 1; }
+
+  .wish-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+  .chip {
+    font-size: 12px;
+    padding: 5px 12px;
+    border-radius: 50px;
+    background: var(--bg);
+    color: var(--text-light);
+    font-weight: 600;
+  }
+  .chip.owner { background: rgba(108,92,231,0.12); color: var(--primary); }
+  .chip.priority-high { background: rgba(225,112,85,0.15); color: var(--danger); }
+  .chip.priority-medium { background: rgba(253,203,110,0.25); color: #b8860b; }
+  .chip.priority-low { background: rgba(0,184,148,0.15); color: var(--success); }
+
+  .wish-link {
+    display: inline-block;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+  .wish-link:hover { text-decoration: underline; }
+
+  .wish-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn-icon {
+    flex: 1;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    background: var(--bg);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-icon:hover { background: #e8eaf0; color: var(--text); }
+
+  .btn-reserve { background: rgba(0,184,148,0.12); color: var(--success); }
+  .btn-reserve:hover { background: rgba(0,184,148,0.22); }
+  .btn-reserve.active { background: var(--success); color: white; }
+
+  .btn-delete:hover { background: rgba(225,112,85,0.15); color: var(--danger); }
+
+  .reserved-badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--success);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0,184,148,0.4);
+  }
+
+  .empty { text-align: center; padding: 80px 20px; color: var(--text-light); }
+  .empty-icon { font-size: 72px; margin-bottom: 20px; }
+  .empty h3 { font-size: 22px; color: var(--text); margin-bottom: 8px; }
+  .empty p { font-size: 15px; }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(45,52,54,0.5);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 200;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s; }
+
+  .modal {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 32px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+
+  .modal h2 { font-size: 24px; margin-bottom: 24px; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .modal-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .modal-actions .btn { flex: 1; justify-content: center; }
+
+  @media (max-width: 600px) {
+    .header-inner { flex-direction: column; align-items: stretch; }
+    .logo { justify-content: center; }
+    .user-badge { justify-content: space-between; }
+    .form-row { grid-template-columns: 1fr; }
+    .toolbar { flex-direction: column; }
+    .search-box { width: 100%; }
+    .btn { width: 100%; justify-content: center; }
+    .auth-card { padding: 28px 22px; }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--text);
+    color: white;
+    padding: 14px 28px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 300;
+    pointer-events: none;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ================= AUTH SCREEN ================= -->
+<div class="auth-screen" id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="auth-logo-icon">🎁</span>
+      <h1>WishList</h1>
+      <p>Общий вишлист для друзей и семьи</p>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login">Вход</button>
+      <button class="auth-tab" data-mode="register">Регистрация</button>
+    </div>
+
+    <div class="form-error" id="authError"></div>
+
+    <form id="authForm">
+      <div class="form-group">
+        <label>Логин *</label>
+        <input type="text" id="authLogin" required placeholder="anna_ivanova" autocomplete="username">
+      </div>
+
+      <div class="form-group" id="registerNameGroup" style="display:none;">
+        <label>Ваше имя *</label>
+        <input type="text" id="authName" placeholder="Анна" autocomplete="name">
+      </div>
+
+      <div class="form-group">
+        <label>Пароль *</label>
+        <input type="password" id="authPassword" required placeholder="Минимум 4 символа" autocomplete="current-password">
+      </div>
+
+      <div class="form-group" id="registerAvatarGroup" style="display:none;">
+        <label>Аватар</label>
+        <div class="avatar-picker" id="avatarPicker"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="authSubmitBtn" style="width:100%;justify-content:center;margin-top:8px;">
+        Войти
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div class="app" id="app">
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🎁</span>
+        <span>WishList</span>
+      </div>
+      <div class="user-badge">
+        <div class="user-badge-info">
+          <span id="currentUserAvatar">👤</span>
+          <span id="currentUserName">—</span>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Выйти</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="toolbar">
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Поиск по вишлисту...">
+      </div>
+      <button class="btn btn-primary" id="addBtn">➕ Добавить желание</button>
+    </div>
+
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-filter="all">Все желания</button>
+      <button class="tab" data-filter="mine">Мои желания</button>
+      <button class="tab" data-filter="others">Желания других</button>
+      <button class="tab" data-filter="reserved">Я забронировал</button>
+    </div>
+
+    <div class="wish-grid" id="wishGrid"></div>
+    <div class="empty" id="emptyState" style="display:none;">
+      <div class="empty-icon">🎈</div>
+      <h3>Пока пусто</h3>
+      <p>Добавьте первое желание или позовите друзей!</p>
+    </div>
+  </main>
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Новое желание</h2>
+    <form id="wishForm">
+      <input type="hidden" id="wishId">
+      <div class="form-group">
+        <label>Название *</label>
+        <input type="text" id="wishTitle" required placeholder="Например, наушники Sony">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Цена (₽)</label>
+          <input type="number" id="wishPrice" min="0" placeholder="5000">
+        </div>
+        <div class="form-group">
+          <label>Приоритет</label>
+          <select id="wishPriority">
+            <option value="low">Низкий</option>
+            <option value="medium" selected>Средний</option>
+            <option value="high">Высокий</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Ссылка на товар</label>
+        <input type="url" id="wishLink" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea id="wishDesc" placeholder="Цвет, размер, модель..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelBtn">Отмена</button>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   ХРАНИЛИЩЕ
+   ============================================================ */
+const USERS_KEY = 'wishlist_users_v2';
+const WISHES_KEY = 'wishlist_wishes_v2';
+const SESSION_KEY = 'wishlist_session_v2';
+
+const AVATARS = ['👩','👨','🧑','👩‍🦰','🧔','👱‍♀️','👱','👵','👴','🧑‍🎤','🧑‍💻','🦸‍♀️','🦸','🐱','🐶','🦊'];
+
+/* ============================================================
+   СОСТОЯНИЕ
+   ============================================================ */
+let state = {
+  users: [],        // зарегистрированные пользователи (пусто на старте!)
+  wishes: [],
+  currentUserId: null, // null = не авторизован
+  filter: 'all',
+  search: '',
+  authMode: 'login',   // 'login' | 'register'
+  selectedAvatar: AVATARS[0]
+};
+
+/* ============================================================
+   ЗАГРУЗКА / СОХРАНЕНИЕ
+   ============================================================ */
+function loadState() {
+  try {
+    const users = localStorage.getItem(USERS_KEY);
+    state.users = users ? JSON.parse(users) : [];
+
+    const wishes = localStorage.getItem(WISHES_KEY);
+    state.wishes = wishes ? JSON.parse(wishes) : [];
+
+    const session = localStorage.getItem(SESSION_KEY);
+    if (session && state.users.some(u => u.id === session)) {
+      state.currentUserId = session;
+    }
+  } catch (e) {
+    console.error('Load error:', e);
+    state.users = [];
+    state.wishes = [];
+    state.currentUserId = null;
+  }
+}
+
+function saveUsers() {
+  localStorage.setItem(USERS_KEY, JSON.stringify(state.users));
+}
+
+function saveWishes() {
+  localStorage.setItem(WISHES_KEY, JSON.stringify(state.wishes));
+}
+
+function setSession(userId) {
+  if (userId) localStorage.setItem(SESSION_KEY, userId);
+  else localStorage.removeItem(SESSION_KEY);
+}
+
+/* ============================================================
+   ХЕЛПЕРЫ
+   ============================================================ */
+function getUser(id) {
+  return state.users.find(u => u.id === id) || { name: 'Удалён', avatar: '❓', login: '—' };
+}
+
+function formatPrice(p) {
+  if (!p || p <= 0) return '';
+  return new Intl.NumberFormat('ru-RU').format(p) + ' ₽';
+}
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  const div = document.createElement('div');
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+function clearAuthError() {
+  document.getElementById('authError').classList.remove('show');
+}
+
+/* ============================================================
+   РЕНДЕР АВТОРИЗАЦИИ
+   ============================================================ */
+function renderAvatarPicker() {
+  const container = document.getElementById('avatarPicker');
+  container.innerHTML = AVATARS.map(a =>
+    `<button type="button" class="avatar-opt ${a === state.selectedAvatar ? 'selected' : ''}" data-avatar="${a}">${a}</button>`
+  ).join('');
+}
+
+function setAuthMode(mode) {
+  state.authMode = mode;
+  document.querySelectorAll('.auth-tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.mode === mode)
+  );
+  const isRegister = mode === 'register';
+  document.getElementById('registerNameGroup').style.display = isRegister ? '' : 'none';
+  document.getElementById('registerAvatarGroup').style.display = isRegister ? '' : 'none';
+  document.getElementById('authName').required = isRegister;
+  document.getElementById('authSubmitBtn').textContent = isRegister ? 'Зарегистрироваться' : 'Войти';
+  document.getElementById('authPassword').autocomplete = isRegister ? 'new-password' : 'current-password';
+  clearAuthError();
+  if (isRegister) renderAvatarPicker();
+}
+
+document.querySelectorAll('.auth-tab').forEach(tab => {
+  tab.addEventListener('click', () => setAuthMode(tab.dataset.mode));
+});
+
+document.getElementById('avatarPicker').addEventListener('click', (e) => {
+  const btn = e.target.closest('.avatar-opt');
+  if (!btn) return;
+  state.selectedAvatar = btn.dataset.avatar;
+  renderAvatarPicker();
+});
+
+/* === Обработка формы авторизации === */
+document.getElementById('authForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  clearAuthError();
+
+  const login = document.getElementById('authLogin').value.trim().toLowerCase();
+  const password = document.getElementById('authPassword').value;
+
+  if (login.length < 3) {
+    showAuthError('Логин должен содержать минимум 3 символа');
+    return;
+  }
+  if (password.length < 4) {
+    showAuthError('Пароль должен содержать минимум 4 символа');
+    return;
+  }
+
+  if (state.authMode === 'register') {
+    // === Регистрация ===
+    const name = document.getElementById('authName').value.trim();
+    if (!name) {
+      showAuthError('Введите ваше имя');
+      return;
+    }
+    if (state.users.some(u => u.login === login)) {
+      showAuthError('Этот логин уже занят. Попробуйте другой.');
+      return;
+    }
+
+    const newUser = {
+      id: 'u_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      login,
+      name,
+      avatar: state.selectedAvatar,
+      passwordHash: hashPassword(password),
+      createdAt: Date.now()
+    };
+
+    state.users.push(newUser);
+    saveUsers();
+
+    state.currentUserId = newUser.id;
+    setSession(newUser.id);
+
+    showToast(`Добро пожаловать, ${name}! 🎉`);
+    enterApp();
+
+  } else {
+    // === Вход ===
+    const user = state.users.find(u => u.login === login);
+    if (!user) {
+      showAuthError('Пользователь с таким логином не найден');
+      return;
+    }
+    if (user.passwordHash !== hashPassword(password)) {
+      showAuthError('Неверный пароль');
+      return;
+    }
+
+    state.currentUserId = user.id;
+    setSession(user.id);
+    showToast(`С возвращением, ${user.name}! 👋`);
+    enterApp();
+  }
+});
+
+/* Простой хэш пароля (для localStorage-демо).
+   В реальном проекте используйте bcrypt на сервере! */
+function hashPassword(pwd) {
+  let hash = 0;
+  const salt = 'wishlist_salt_2024';
+  const str = salt + pwd;
+  for (let i = 0; i < str.length; i++) {
+    const chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+/* ============================================================
+   ВХОД / ВЫХОД
+   ============================================================ */
+function enterApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  document.getElementById('authForm').reset();
+
+  const user = getUser(state.currentUserId);
+  document.getElementById('currentUserAvatar').textContent = user.avatar;
+  document.getElementById('currentUserName').textContent = user.name;
+
+  state.filter = 'all';
+  state.search = '';
+  document.getElementById('searchInput').value = '';
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.filter === 'all')
+  );
+
+  renderWishes();
+}
+
+function exitApp() {
+  state.currentUserId = null;
+  setSession(null);
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('authScreen').style.display = 'flex';
+  setAuthMode('login');
+  clearAuthError();
+  document.getElementById('authForm').reset();
+}
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  if (confirm('Выйти из аккаунта?')) {
+    exitApp();
+    showToast('Вы вышли из аккаунта');
+  }
+});
+
+/* ============================================================
+   РЕНДЕР ЖЕЛАНИЙ
+   ============================================================ */
+function getFilteredWishes() {
+  let list = [...state.wishes];
+  const me = state.currentUserId;
+
+  switch (state.filter) {
+    case 'mine': list = list.filter(w => w.ownerId === me); break;
+    case 'others': list = list.filter(w => w.ownerId !== me); break;
+    case 'reserved': list = list.filter(w => w.reservedBy === me); break;
+  }
+
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    list = list.filter(w =>
+      w.title.toLowerCase().includes(q) ||
+      (w.desc || '').toLowerCase().includes(q) ||
+      getUser(w.ownerId).name.toLowerCase().includes(q)
+    );
+  }
+
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+  list.sort((a, b) => {
+    const aMine = a.ownerId === me ? 0 : 1;
+    const bMine = b.ownerId === me ? 0 : 1;
+    if (aMine !== bMine) return aMine - bMine;
+    return (priorityOrder[a.priority] ?? 1) - (priorityOrder[b.priority] ?? 1);
+  });
+
+  return list;
+}
+
+function renderWishes() {
+  const grid = document.getElementById('wishGrid');
+  const empty = document.getElementById('emptyState');
+  const list = getFilteredWishes();
+
+  if (list.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  grid.innerHTML = list.map(w => {
+    const owner = getUser(w.ownerId);
+    const me = state.currentUserId;
+    const isMine = w.ownerId === me;
+    const isReservedByMe = w.reservedBy === me;
+    const isReserved = !!w.reservedBy;
+    const reservedByUser = isReserved ? getUser(w.reservedBy) : null;
+    const priorityLabels = { high: 'Высокий', medium: 'Средний', low: 'Низкий' };
+
+    return `
+      <div class="wish-card ${isReserved ? 'reserved' : ''}">
+        ${isReserved ? `<div class="reserved-badge">✓ ${isReservedByMe ? 'Вы бронировали' : 'Забронировано'}</div>` : ''}
+        <div class="wish-image">🎁</div>
+        <div class="wish-body">
+          <div class="wish-header">
+            <div class="wish-title">${escapeHtml(w.title)}</div>
+            ${w.price ? `<div class="wish-price">${formatPrice(w.price)}</div>` : ''}
+          </div>
+          ${w.desc ? `<div class="wish-desc">${escapeHtml(w.desc)}</div>` : ''}
+          <div class="wish-meta">
+            <span class="chip owner">${owner.avatar} ${escapeHtml(owner.name)}</span>
+            <span class="chip priority-${w.priority}">${priorityLabels[w.priority] || 'Средний'}</span>
+            ${isReserved ? `<span class="chip">🎯 ${reservedByUser.avatar} ${escapeHtml(reservedByUser.name)}</span>` : ''}
+          </div>
+          ${w.link ? `<a href="${escapeHtml(w.link)}" target="_blank" rel="noopener" class="wish-link">🔗 Посмотреть товар</a>` : ''}
+          <div class="wish-actions">
+            ${!isMine ? `
+              <button class="btn-icon btn-reserve ${isReservedByMe ? 'active' : ''}"
+                      data-action="reserve" data-id="${w.id}"
+                      ${isReserved && !isReservedByMe ? 'disabled style="opacity:0.5;cursor:not-allowed"' : ''}>
+                ${isReservedByMe ? '✓ Отменить бронь' : '🎯 Забронировать'}
+              </button>
+            ` : `
+              <button class="btn-icon" data-action="edit" data-id="${w.id}">✏️ Изменить</button>
+              <button class="btn-icon btn-delete" data-action="delete" data-id="${w.id}">🗑 Удалить</button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   UI-ОБРАБОТЧИКИ
+   ============================================================ */
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.search = e.target.value;
+  renderWishes();
+});
+
+document.getElementById('tabs').addEventListener('click', (e) => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  state.filter = tab.dataset.filter;
+  renderWishes();
+});
+
+/* === Модальное окно === */
+const overlay = document.getElementById('modalOverlay');
+const form = document.getElementById('wishForm');
+const modalTitle = document.getElementById('modalTitle');
+
+function openModal(wish = null) {
+  form.reset();
+  document.getElementById('wishId').value = '';
+  if (wish) {
+    modalTitle.textContent = 'Редактировать желание';
+    document.getElementById('wishId').value = wish.id;
+    document.getElementById('wishTitle').value = wish.title;
+    document.getElementById('wishPrice').value = wish.price || '';
+    document.getElementById('wishPriority').value = wish.priority || 'medium';
+    document.getElementById('wishLink').value = wish.link || '';
+    document.getElementById('wishDesc').value = wish.desc || '';
+  } else {
+    modalTitle.textContent = 'Новое желание';
+  }
+  overlay.classList.add('open');
+  setTimeout(() => document.getElementById('wishTitle').focus(), 100);
+}
+
+function closeModal() { overlay.classList.remove('open'); }
+
+document.getElementById('addBtn').addEventListener('click', () => openModal());
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!state.currentUserId) return;
+
+  const id = document.getElementById('wishId').value;
+  const data = {
+    title: document.getElementById('wishTitle').value.trim(),
+    price: parseInt(document.getElementById('wishPrice').value) || 0,
+    priority: document.getElementById('wishPriority').value,
+    link: document.getElementById('wishLink').value.trim(),
+    desc: document.getElementById('wishDesc').value.trim()
+  };
+
+  if (!data.title) { showToast('Введите название'); return; }
+
+  if (id) {
+    const wish = state.wishes.find(w => w.id === id);
+    if (wish && wish.ownerId === state.currentUserId) {
+      Object.assign(wish, data);
+      showToast('Желание обновлено ✓');
+    }
+  } else {
+    state.wishes.push({
+      id: 'w_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      ownerId: state.currentUserId,
+      reservedBy: null,
+      createdAt: Date.now(),
+      ...data
+    });
+    showToast('Желание добавлено 🎉');
+  }
+
+  saveWishes();
+  closeModal();
+  renderWishes();
+});
+
+/* === Действия с карточками === */
+document.getElementById('wishGrid').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const { action, id } = btn.dataset;
+  const wish = state.wishes.find(w => w.id === id);
+  if (!wish) return;
+
+  if (action === 'reserve') {
+    if (wish.ownerId === state.currentUserId) return;
+    if (wish.reservedBy === state.currentUserId) {
+      wish.reservedBy = null;
+      showToast('Бронь отменена');
+    } else if (wish.reservedBy) {
+      showToast('Уже забронировано другим');
+      return;
+    } else {
+      wish.reservedBy = state.currentUserId;
+      showToast('Забронировано! Получатель не увидит это 🎁');
+    }
+  }
+
+  if (action === 'delete') {
+    if (wish.ownerId !== state.currentUserId) return;
+    if (!confirm('Удалить это желание?')) return;
+    state.wishes = state.wishes.filter(w => w.id !== id);
+    showToast('Удалено');
+  }
+
+  if (action === 'edit') {
+    if (wish.ownerId !== state.currentUserId) return;
+    openModal(wish);
+    return;
+  }
+
+  saveWishes();
+  renderWishes();
+});
+
+/* ============================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ============================================================ */
+loadState();
+renderAvatarPicker();
+setAuthMode('login');
+
+if (state.currentUserId) {
+  enterApp();
+} else {
+  document.getElementById('authScreen').style.display = 'flex';
+}
+</script>
+
+</body>
+</html>
